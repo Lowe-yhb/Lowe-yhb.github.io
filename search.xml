@@ -1,18 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title><![CDATA[深入理解java String(2)]]></title>
-    <url>%2F2019%2F07%2F15%2Fjava%2Fbasic%2Fstring2%2F</url>
-    <content type="text"><![CDATA[JVM相关知识String源码分析String在JVM的解析为什么String要被设计成不可变切不能被继承]]></content>
-      <categories>
-        <category>java基础</category>
-      </categories>
-      <tags>
-        <tag>Java基础</tag>
-        <tag>String</tag>
-      </tags>
-  </entry>
-  <entry>
     <title><![CDATA[深入理解java String(1)]]></title>
     <url>%2F2019%2F07%2F09%2Fjava%2Fbasic%2Fstring1%2F</url>
     <content type="text"><![CDATA[String类1234567891011public final class String implements java.io.Serializable, Comparable&lt;String&gt;, CharSequence &#123; /** The value is used for character storage. */ private final char value[]; /** Cache the hash code for the string */ private int hash; // Default to 0 /** use serialVersionUID from JDK 1.0.2 for interoperability */ private static final long serialVersionUID = -6849794470754667710L;&#125; String类是final修饰的，即不可继承 String使用数组实现的 12345678910public String concat(String str) &#123; int otherLen = str.length(); if (otherLen == 0) &#123; return this; &#125; int len = value.length; char buf[] = Arrays.copyOf(value, len + otherLen); str.getChars(buf, len); return new String(buf, true);&#125; String对象一旦被创建就是固定不变的了 String中的操作都是生成新的String，原始的字符串并没有被改变 字符串常量池 字符串的分配和其他对象分配一样，是需要消耗高昂的时间和空间的，而且字符串我们使用的非常多。JVM为了提高性能和减少内存的开销，在实例化字符串的时候进行了一些优化：使用字符串常量池。每当我们创建字符串常量时，JVM会首先检查字符串常量池，如果该字符串已经存在常量池中，那么就直接返回常量池中的实例引用。如果字符串不存在常量池中，就会实例化该字符串并且将其放到常量池中。由于String字符串的不可变性我们可以十分肯定常量池中一定不存在两个相同的字符串。 字符串的创建1234//使用引号创建String a = "lowe";//使用new创建String b = new String("lowe"); 单独使用””引号创建的字符串都是常量,编译期就已经确定存储到常量池中； 使用new String(“”)创建的对象会存储到堆中,是运行期新创建的； 使用只包含常量的字符串连接符如”aa” + “aa”创建的也是常量,编译期就能确定,已经确定存储到常量池中； 使用包含变量的字符串连接符如”aa” + s1创建的对象是运行期才创建的,存储在堆中； 使用引号创建不一定创建对象 123456String a = &quot;lowe&quot;;String b = &quot;lowe&quot;;String c = &quot;lo&quot; + we&quot;;//a,b,c指向同一个引用，第一次创建后已经在常量池中存在对象了，//第二次创建的时候会去常量池中查找，不会再次创建//在程序编译期，JVM就将常量字符串的&quot;+&quot;连接优化为连接后的值，编译后c的值就是“lowe” 使用new创建一定创建对象 123String a = new String(&quot;lowe&quot;);String b = new String(&quot;lowe&quot;);//a与b是两个对象 final优化 当final变量是基本数据类型以及String类型时，如果在编译期间能知道它的确切值，则编译器会把它当做编译期常量使用。也就是说在用到该final变量的地方，相当于直接访问的这个常量，不需要在运行时确定。1234String a = &quot;lowe&quot;;final String b = &quot;lo&quot;;String c = b+ &quot;we&quot;;//a==c 综合测试123String a = &quot;lowe&quot;;String b = &quot;lowe&quot;;System.out.println(a==b);//true 123String a=new String(&quot;lowe&quot;);String b=new String(&quot;lowe&quot;);System.out.println(a==b);//false 1234//编译期确定String a=&quot;lowe&quot;;String b=&quot;lo&quot;+&quot;we&quot;;System.out.println(a==b);//true 1234567//编译期无法确定String a=&quot;lowe&quot;;String b=new String(&quot;lowe&quot;);String c=&quot;lo&quot; + new String(&quot;we&quot;);System.out.println(a==b);//falseSystem.out.println(a==c);//falseSystem.out.println(b==c);//false 123456//编译期无法确定String a = &quot;lowe&quot;;String b = &quot;lo&quot;;String c = &quot;we&quot;;String d = b + c;System.out.println(a==d);//false 12345//final优化String a = &quot;lowe&quot;;final String b = &quot;lo&quot;;String c = b+ &quot;we&quot;;System.out.println(a==c);//true 12345678910//虽然用final修饰了，但是是通过方法调用返回的，只能在运行期确定&#123; String a = &quot;lowe&quot;; final String b = getStr(); String c = b+ &quot;we&quot;; System.out.println(a==c);//false&#125;private static String getStr()&#123; return &quot;lo&quot;;&#125;]]></content>
